@@ -1,0 +1,424 @@
+---
+metadata:
+  title: "Horizon TCL - C Language Coding Standard"
+  version: "1.1"
+  date: "2025-01-28"
+  authors:
+    - "Donal Morrissey"
+  organization: "Horizon Embedded Ltd."
+  status: "Mandatory for all C deliverables"
+
+summary:
+  purpose:
+    - "Maximize readability, reusability and maintainability"
+    - "Present professional appearance to customers"
+    - "Provide consistent house style"
+  key_principles:
+    - "Readability is the primary requirement"
+    - "Code should be maintainable by other engineers"
+    - "Clarity over brevity"
+    - "Explicit over implicit"
+
+terminology:
+  must: "Absolute requirement"
+  must_not: "Absolute prohibition"
+  should: "Recommended but may be ignored with valid reasons"
+  may: "Optional"
+
+naming:
+  files:
+    rules:
+      - must_be_lowercase: true
+      - no_spaces: true
+      - use_underscore_separator: true
+      - allowed_punctuation: [underscore, file_extension]
+    examples:
+      valid: ["protocol_input_checker.h", "protocol_input_checker.c"]
+      note: "Header files should share prefix with their .c file"
+
+  constants:
+    rules:
+      - must_use_define: true
+      - use_uppercase: true
+      - use_underscore_separator: true
+    examples:
+      valid:
+        - "DEBUG_LEVEL 1"
+        - "MAX_THRESHOLD_ALLOWED 255"
+      computed:
+        format: "MIN_LEVEL (( BASE_LEVEL + ( STEP_OFFSET + 1 )) / 2 )"
+        note: "Use parentheses to ensure operator precedence"
+
+  types:
+    rules:
+      - must_use_stdint: true
+      - use_t_suffix: true
+      - be_descriptive: true
+    examples:
+      basic:
+        - "uint8_t"
+        - "int32_t"
+        - "uint64_t"
+
+  variables:
+    rules:
+      - no_hungarian_notation: true
+      - be_descriptive: true
+      - use_camelCase: true
+      - first_letter_lowercase: true
+      - no_underscores: true
+      - declaration:
+        - one_per_line: true
+    examples:
+      valid:
+        - "loopCounter"
+        - "maxThresholdValueReached"
+        - "isANumericValue"
+      invalid:
+        - "myPointer"
+        - "MaxItemNumber"
+        - "last_input_seen"
+
+  functions:
+    rules:
+      - be_descriptive: true
+      - use_PascalCase: true
+      - no_underscores: true
+      - use_verb_noun_format: true
+    examples:
+      valid:
+        - "IncrementLoopCounter()"
+        - "IsMaxThresholdValueReached()"
+        - "GetConfigBlockPointer()"
+      invalid:
+        - "DoStuff()"
+        - "storeItemNumber()"
+        - "InCfgShTmrPtr()"
+
+formatting:
+  indentation:
+    size: 2
+    type: spaces
+    rules:
+      - must_indent_inside_blocks: true
+      - switch_cases_may_align_with_switch: true
+
+  whitespace:
+    rules:
+      - use_blank_lines:
+          - before_comment_blocks: true
+          - around_related_code_groups: true
+      - use_spaces:
+          - around_operators: true
+          - inside_parentheses: true
+          - inside_brackets: true
+      - no_spaces:
+          - inside_empty_parentheses: true
+          - inside_empty_brackets: true
+    restrictions:
+      - one_statement_per_line: true
+
+  control_blocks:
+    comparison_rules:
+      - rule: "Constants must be on left side of comparison operator"
+      - reason: "Prevents accidental assignment with '=' instead of '=='"
+      - examples:
+        valid: |
+          if( MAX_VALUE >= inputValue )
+          if( MIN_THRESHOLD <= sensorReading )
+          if( EXPECTED_STATE == currentState )
+        invalid: |
+          if( inputValue <= MAX_VALUE )
+          if( sensorReading >= MIN_THRESHOLD )
+          if( currentState == EXPECTED_STATE )
+
+    if_else:
+      rules:
+        - must_use_braces: true
+        - explicit_boolean_tests: true
+        - no_double_negatives: true
+        - constants_on_left: true
+      examples:
+        valid: |
+          if( TRUE == isNumeric )
+          {
+            // code
+          }
+          if( MAX_COUNT > currentCount )
+          {
+            // code
+          }
+        invalid: |
+          if( isNumeric )
+          if( !actionNotComplete == TRUE )
+          f( currentCount < MAX_COUNT )
+
+    switch:
+      rules:
+        - must_have_default: true
+        - must_use_break: true
+        - comment_fallthrough: true
+
+programming_techniques:
+  recommended:
+    principle: "KISS - Keep It Simple And Stupid"
+    guidelines:
+      - "Keep functions short and to the point"
+      - "One clear purpose per function"
+      - "Prefer clarity over compactness"
+      - "Separate assignments to multiple lines"
+      - "Use modern editors and compilers - no need to save space"
+      - "Single return point from functions"
+    function_returns:
+      rule: "must have single exit point"
+      reason: "Improves code clarity and makes cleanup/resource management easier"
+      example:
+        valid: |
+          bool CheckValue(int value)
+          {
+            bool result = false;
+            
+            if(value > MAX_VALUE)
+            {
+              result = false;
+            }
+            else if(value < MIN_VALUE)
+            {
+              result = false;
+            }
+            else
+            {
+              result = true;
+            }
+            
+            return result;
+          }
+        invalid: |
+          bool CheckValue(int value)
+          {
+            if(value > MAX_VALUE)
+            {
+              return false;
+            }
+            if(value < MIN_VALUE)
+            {
+              return false;
+            }
+            return true;
+          }
+  
+  prohibited:
+    techniques:
+      - name: "Clever coding techniques"
+        reason: "Makes code harder to understand and maintain"
+      - name: "Magic numbers"
+        reason: "Must use #defined constants with meaningful names"
+        example: "Use MAX_BUFFER_SIZE instead of 1024"
+      - name: "goto statements"
+        exception: "May be used for error handling when clearer than multiple exit paths"
+        requires: "Must be justified case by case"
+      - name: "Ambiguous sequence points"
+        example: "sortFunction( x++, x++ );"
+        reason: "Undefined behavior depends on compiler"
+      - name: "Side effects in function calls"
+        example: "sortFunction( x++ );"
+        reason: "Makes behavior unclear and hard to debug"
+      - name: "Mixed assignments and conditionals"
+        example: "if( x = (y++ == LIMIT) )"
+        correct: |
+          y++;
+          if( y == LIMIT )
+          {
+            x = TRUE;
+          }
+      - name: "Dynamic memory allocation"
+        exception: "May be used during initialization if never deallocated"
+        reason: "Avoid memory leaks in embedded systems"
+
+module_design:
+  architecture:
+    principles:
+      - name: "Dependency Injection"
+        required: true
+        scope: "All modules above driver level"
+        exceptions: 
+          - "Low-level hardware drivers"
+          - "Direct hardware register access modules"
+        benefits:
+          - "Facilitates unit testing through mock interfaces"
+          - "Reduces coupling between modules"
+          - "Improves maintainability"
+          - "Makes dependencies explicit"
+    
+    implementation:
+      interface:
+        - must_define_handle: true
+        - must_have_init_function: true
+        - must_declare_callbacks: true
+      
+      initialization:
+        pattern: |
+          typedef struct moduleContext_tag
+          {
+            // Dependencies
+            interfaceA_t* interfaceA;
+            interfaceB_t* interfaceB;
+            
+            // Module state
+            state_t currentState;
+            config_t configuration;
+            
+            // Callbacks
+            callbackFunction_t notifyCallback;
+          } moduleContext_t;
+          
+          moduleError_t ModuleInit(moduleConfig_t* config, moduleContext_t** context)
+          {
+            moduleError_t result = MODULE_ERROR_NONE;
+            
+            *context = malloc(sizeof(moduleContext_t));
+            // Initialize with dependencies from config
+            (*context)->interfaceA = config->interfaceA;
+            (*context)->interfaceB = config->interfaceB;
+            
+            return result;
+          }
+
+      configuration:
+        pattern: |
+          typedef struct moduleConfig_tag
+          {
+            // Required interfaces
+            interfaceA_t* interfaceA;
+            interfaceB_t* interfaceB;
+            
+            // Optional callbacks
+            callbackFunction_t notifyCallback;
+            
+            // Module specific configuration
+            uint32_t timeout;
+            bool enableFeatureX;
+          } moduleConfig_t;
+
+      dependencies:
+        rules:
+          - all_dependencies_must_be_injected: true
+          - no_global_variables: true
+          - no_direct_hardware_access: true
+          - no_static_dependencies: true
+        exceptions:
+          - "Hardware registers in driver layers"
+          - "Truly global system states"
+
+    testing:
+      requirements:
+        - "All dependencies must be mockable"
+        - "No hidden dependencies"
+        - "Module must be testable in isolation"
+      mocking:
+        pattern: |
+          // Mock interface
+          typedef struct mockInterface_tag
+          {
+            bool functionACalled;
+            int functionACallCount;
+            returnValue_t functionAReturnValue;
+          } mockInterface_t;
+          
+          returnValue_t MockFunctionA(void* context)
+          {
+            mockInterface_t* mock = (mockInterface_t*)context;
+            mock->functionACalled = true;
+            mock->functionACallCount++;
+            return mock->functionAReturnValue;
+          }
+
+    example_structure: |
+      my_module.h:
+        - Type definitions
+        - Interface functions
+        - Error codes
+        - Configuration structures
+      
+      my_module.c:
+        - Private implementations
+        - No static dependencies
+        - All external interfaces through context
+        
+      my_module_types.h:
+        - Internal type definitions
+        - Shared between implementation files
+      
+      my_module_tests.c:
+        - Unit tests using mocked dependencies
+        - Integration tests with real dependencies
+
+defensive_programming:
+  assert:
+    macro: "ASSERT_INVARIANT"
+    usage: "Check critical assumptions"
+    example: "ASSERT_INVARIANT( pointerToParamBlock != NULL )"
+    note: "Should be removable in release builds"
+
+unit_testing:
+  framework:
+    name: "Ceedling"
+    components:
+      - "Unity Test Framework"
+      - "CMock"
+      - "Ceedling build tool"
+  
+  core_principles:
+    test_independence:
+      rule: "Tests must be completely independent"
+      details:
+        - "No test should depend on the execution of another test"
+        - "Each test must setup its own complete test environment"
+        - "Global state must be reset in setUp()/tearDown()"
+        - "Test execution order must not matter"
+  test_structure:
+    minimum_requirements:
+      - "setUp() and tearDown() functions for consistent test environment"
+      - "Clear separation between Arrange, Act, and Assert sections"
+      - "Proper initialization of all required mocks"
+      - "Explicit verification of all test outcomes"
+    
+comments:
+  rules:
+    - approximate_1_to_1_ratio: true
+    - prefer_cpp_style: true
+    - must_use_doxygen: true
+    - keep_updated: true
+    - no_obvious_comments: true
+  doxygen:
+    required: true
+    scope: "all comments must be doxygen compatible"
+    styles:
+      - "/** ... */"
+    block_tags:
+      - "@brief"
+      - "@param"
+      - "@return"
+      - "@note"
+      - "@warning"
+    inline_tags:
+      - "@p"
+      - "@a"
+      - "@c"
+    function_header:
+      required_fields:
+        - "@brief"
+        - "@param (for each parameter)"
+        - "@return (if applicable)"
+
+building:
+  source_control:
+    rules:
+      - must_use_version_control: true
+      - auto_insert_version_info: true
+  
+  compiler:
+    rules:
+      - enable_all_warnings: true
+      - treat_warnings_as_errors: true
+      - use_final_warning_level_from_start: true

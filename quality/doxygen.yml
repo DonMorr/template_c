@@ -1,0 +1,100 @@
+doxygen_standard:
+  header_file:
+    file_header:
+      required_tags:
+        - "@file"
+        - "@brief"
+        - "@copyright"
+      
+    module_header:
+      required_tags:
+        - "@brief"
+        - "@details"
+        - "@date"
+        - "@version"
+        - "@requirement"
+
+    type_definitions:
+      struct:
+        - "@brief"
+        - "@note" (optional)
+        - field_descriptions: true
+      enum:
+        - "@brief"
+        - value_descriptions: true
+      typedef:
+        - "@brief"
+
+    functions:
+      api_documentation:
+        required_tags:
+          - "@brief": "One line description"
+          - "@details": "Full API usage details"
+          - "@param": "All parameters with valid ranges"
+          - "@return": "All possible return values"
+          - "@requirement": "Traced requirements"
+        optional_tags:
+          - "@note": "Usage notes/warnings"
+          - "@see": "Related functions"
+
+  source_file:
+    file_header:
+      required_tags:
+        - "@file" 
+        - "@brief"
+        - "@copyright"
+        - "@requirement"
+
+    implementation_notes:
+      function_header:
+        required_tags:
+          - "@brief": "Implementation approach"
+          - "@details": "Why implemented this way"
+          - "@note": "Key implementation decisions"
+        optional_tags:
+          - "@warning": "Implementation gotchas"
+          - "@see": "Related implementations"
+
+    diagrams:
+      when_required:
+        - complex_state_machines
+        - multi_step_algorithms
+        - component_interactions
+        - data_flows
+      format: "mermaid"
+      placement: "Above relevant function"
+      types:
+        - stateDiagram-v2
+        - flowchart
+        - sequenceDiagram
+        - classDiagram
+
+    example_diagram: |
+      /**
+       * @brief LED Pattern State Machine Implementation
+       *
+       * ```mermaid
+       * stateDiagram-v2
+       *   [*] --> INIT
+       *   INIT --> READY
+       *   READY --> PATTERN_RUNNING: StartPattern
+       *   PATTERN_RUNNING --> READY: StopPattern
+       *   PATTERN_RUNNING --> ERROR: HardwareFailure
+       *   ERROR --> READY: Reset
+       * ```
+       */
+
+    example_header: |
+      /**
+       * @brief Implements LED pattern sequencing
+       * @details Uses state machine approach with hardware verification
+       *          to ensure pattern integrity and detect failures
+       * @note Critical timing handled via system tick callbacks
+       * @warning Ensure GPIO readback enabled for error detection
+       */
+
+  general_rules:
+    alignment: "Use spaces for alignment"
+    line_length: "Max 80 characters"
+    tag_order: "Follow specified order"
+    capitalization: "Sentence case for descriptions"
