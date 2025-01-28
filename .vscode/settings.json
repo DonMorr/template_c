@@ -1,0 +1,8 @@
+{
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": true,
+    "C_Cpp.doxygen.generatedStyle": "/**",
+    "editor.formatOnSave": true,
+    "C_Cpp.clang_format_style": "file",
+    "C_Cpp.formatting": "clangFormat"
+}
